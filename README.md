@@ -68,7 +68,7 @@ The application will automatically open in your default web browser at `http://1
 Click the **Select Source Folder** button to choose the main directory you want to organize.
 
 ### 2. Configure Naming (Optional)
-Use the **Naming Options** in the center panel to add a custom prefix or suffix to the generated folder and file names.
+Use the **Naming Options** in the left panel to add a custom prefix or suffix to the generated folder and file names.
 
 ### 3. Find Duplicates (Optional)
 Click **Find Duplicates** to scan files based on their content. This allows you to use the 'Duplicates' filter and organization criteria.
@@ -188,5 +188,6 @@ For support, questions, or feedback, please contact the author or create an issu
 ---
 
 **Yezee File Organizer v1.5.1** - Making file organization simple and efficient! 🗂️✨
+
 
 

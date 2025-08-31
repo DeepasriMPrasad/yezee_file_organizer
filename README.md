@@ -13,7 +13,7 @@ A powerful and intuitive file organization tool that helps you automatically sor
 - **Duplicate Detection**: Find and manage duplicate files based on content
 - **Flexible Filtering**: Create complex rules with wildcards and conditions
 - **Custom Naming**: Add prefixes and suffixes to organized folders and files
-- **Safe Operations**: Built-in undo functionality for move operations
+- **Safe Operations**: Built-in **undo** functionality for move operations
 - **Modern Interface**: Clean, responsive web-based UI with dark mode support and light mode support.
 - Note this is meant as a simple file classifier for folder organization and was born out of need to not pay 30 dollars for file organization tools available in market. However this is an initial version, so use at your own risk! be sure to use copy feature, before deleting folders.
   Also this may not handle extremely large file systems very well.
@@ -188,4 +188,5 @@ For support, questions, or feedback, please contact the author or create an issu
 ---
 
 **Yezee File Organizer v1.5.1** - Making file organization simple and efficient! 🗂️✨
+
 

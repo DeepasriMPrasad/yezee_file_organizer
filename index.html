@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yezee File Organizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-200 antialiased">
+<div id="app" class="flex flex-col h-screen p-4 max-w-screen-2xl mx-auto">
+    <!-- Header -->
+    <header class="flex items-center justify-between pb-4 border-b border-gray-300 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-folder-tree text-2xl text-blue-500"></i>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Yezee File Organizer</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="help-btn" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                <i class="fa-solid fa-question-circle w-5 h-5"></i>
+            </button>
+            <button id="about-btn" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                <i class="fa-solid fa-info-circle w-5 h-5"></i>
+            </button>
+            <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-.707 12.122l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414-1.414zM18 12a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            </button>
+            <button id="selectFolderBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition-all btn-press">
+                <i class="fa-solid fa-folder-open mr-2"></i>Select Source Folder
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-4 py-4 overflow-y-auto min-h-0">
+        <!-- Left Panel: Filter & Rules -->
+        <div class="bg-white dark:bg-gray-900 rounded-lg p-4 flex flex-col overflow-y-auto">
+            <div class="flex items-center gap-2 mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Filter & Rules</h2>
+                <div class="tooltip">
+                    <i class="fa-solid fa-info-circle text-gray-500 dark:text-gray-400 cursor-pointer"></i>
+                    <span class="tooltiptext text-left">Use wildcards in Name/Extension fields:<br>* = matches multiple characters<br>? = matches a single character</span>
+                </div>
+            </div>
+            <div class="mb-4">
+                <button id="addRuleBtn" class="w-full text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white font-semibold py-2 px-3 rounded-md transition-all btn-press">
+                    <i class="fa-solid fa-plus mr-2"></i>Add Rule
+                </button>
+            </div>
+            <div class="flex items-center justify-center bg-gray-100 dark:bg-gray-800 p-2 rounded-lg mb-4">
+                <span class="text-sm font-semibold mr-4 text-gray-600 dark:text-gray-400">Process Rules As</span>
+                <div id="ruleOperatorToggle" class="flex-shrink-0 bg-gray-200 dark:bg-gray-700 p-1 rounded-md flex items-center shadow-inner">
+                    <button data-value="OR" class="operator-btn px-4 py-1 text-sm rounded-md transition-colors font-semibold">OR</button>
+                    <button data-value="AND" class="operator-btn px-4 py-1 text-sm rounded-md transition-colors font-semibold">AND</button>
+                </div>
+            </div>
+            <div id="rulesContainer" class="space-y-2 flex-grow">
+                <div id="noRulesMessage" class="h-full flex flex-col items-center justify-center text-gray-500">
+                    <i class="fa-solid fa-filter text-4xl mb-2"></i>
+                    <p class="text-center">No rules defined. <br> All files will be processed.</p>
+                </div>
+            </div>
+            <!-- Naming Options -->
+            <div class="mt-auto pt-4 border-t border-gray-300 dark:border-gray-700">
+                <button id="toggleNamingOptionsBtn" class="w-full flex justify-between items-center text-left font-semibold text-gray-800 dark:text-white py-2">
+                    <span>Naming Options</span>
+                    <i id="namingOptionsChevron" class="fa-solid fa-chevron-down transition-transform"></i>
+                </button>
+                <div id="naming-options-wrapper" class="collapsible">
+                    <div class="space-y-3 pt-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Folder Prefix / Suffix</label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="text" id="folderPrefix" placeholder="Prefix" class="w-full bg-gray-200 dark:bg-gray-700 p-1 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                <input type="text" id="folderSuffix" placeholder="Suffix" class="w-full bg-gray-200 dark:bg-gray-700 p-1 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filename Prefix / Suffix</label>
+                            <div class="flex gap-2 mt-1">
+                                <input type="text" id="filenamePrefix" placeholder="Prefix" class="w-full bg-gray-200 dark:bg-gray-700 p-1 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                <input type="text" id="filenameSuffix" placeholder="Suffix" class="w-full bg-gray-200 dark:bg-gray-700 p-1 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-around text-sm">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="filenameIncrementalPrefix" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                                <label for="filenameIncrementalPrefix">Add Numeric Prefix</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="filenameIncrementalSuffix" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                                <label for="filenameIncrementalSuffix">Add Numeric Suffix</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel: Organizer -->
+        <div class="bg-white dark:bg-gray-900 rounded-lg p-4 lg:col-span-2 flex flex-col items-center">
+            <div class="w-full text-center flex-shrink-0">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">SOURCE FOLDER</h3>
+                <div class="tooltip w-full mb-2">
+                    <p id="sourcePath" class="text-lg font-semibold text-blue-600 bg-gray-200 dark:text-blue-300 dark:bg-gray-800 rounded-md px-3 py-2 truncate">No Folder Selected</p>
+                    <span id="sourceTooltip" class="tooltiptext">No Folder Selected</span>
+                </div>
+
+                <div id="copy-destination-wrapper" class="collapsible">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2">COPY DESTINATION FOLDER</h3>
+                        <div class="tooltip w-full">
+                            <button id="selectCopyDestBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all btn-press">
+                                <i class="fa-solid fa-crosshairs mr-2"></i>Select Copy Destination
+                            </button>
+                            <p id="copyDestPath" class="text-md font-semibold text-indigo-600 bg-gray-200 dark:text-indigo-300 dark:bg-gray-800 rounded-md px-3 py-2 truncate mt-2">Not Set</p>
+                            <span id="copyDestTooltip" class="tooltiptext">Not Set</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full max-w-sm mx-auto my-4 aspect-square">
+                <canvas id="fileChart"></canvas>
+            </div>
+
+            <div class="w-full flex-shrink-0 mt-auto">
+                <div id="chartLegend" class="text-xs text-gray-500 dark:text-gray-400 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-1 mb-4"></div>
+
+                <button id="findDuplicatesBtn" class="w-full text-sm bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded-md transition-all btn-press flex-grow mb-4">
+                    <i class="fa-solid fa-clone mr-2"></i>Find Duplicates
+                </button>
+
+                <fieldset class="mb-2">
+                    <legend class="sr-only">Operation Type</legend>
+                    <div class="flex items-center justify-center gap-6">
+                        <div class="flex items-center">
+                            <input id="op-copy" name="operation-type" type="radio" value="copy" checked class="h-4 w-4 border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                            <label for="op-copy" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Copy</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="op-move" name="operation-type" type="radio" value="move" class="h-4 w-4 border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                            <label for="op-move" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Move</label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="w-full flex items-center justify-center gap-4 mb-2">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="deleteEmpty" class="form-checkbox h-5 w-5 text-blue-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500" title="After moving, delete any source folders that become empty" disabled>
+                        <label for="deleteEmpty" id="deleteEmptyLabel" class="font-medium text-gray-500">Delete Empty Folders</label>
+                    </div>
+                    <div class="flex items-center space-x-2 tooltip">
+                        <label for="subfolderDepth" class="font-medium">Depth:</label>
+                        <input type="number" id="subfolderDepth" value="3" min="-1" class="w-16 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-1 text-center focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <span class="tooltiptext">Scan depth. 0=this folder only. -1=infinite.</span>
+                    </div>
+                </div>
+
+                <button id="organizeBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-lg shadow-lg transition-all btn-press text-xl mt-2">
+                    <i class="fa-solid fa-cogs mr-2"></i>Organize <span id="fileCount">0</span> Files
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Preview -->
+        <div class="bg-white dark:bg-gray-900 rounded-lg p-4 flex flex-col overflow-hidden">
+            <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Preview</h2>
+            <div class="flex flex-col justify-start items-stretch gap-2 bg-gray-100 dark:bg-gray-800 p-2 rounded-md mb-2 text-sm">
+                <div class="w-full">
+                    <label for="organizeByPrimary" class="block mb-1 font-medium">Organize by:</label>
+                    <select id="organizeByPrimary" class="w-full bg-gray-200 dark:bg-gray-700 rounded-md p-1">
+                        <optgroup label="General">
+                            <option value="type">Type</option>
+                            <option value="extension">Extension</option>
+                            <option value="alphabet">Alphabet</option>
+                            <option value="size">Size</option>
+                            <option value="duplicates" disabled>Duplicates</option>
+                        </optgroup>
+                        <optgroup label="Date Modified">
+                            <option value="date_modified_yyyy">Year (YYYY)</option>
+                            <option value="date_modified_yyyy_mm">Year-Month (YYYY-MM)</option>
+                            <option value="date_modified_yyyy_mm_dd">Full Date (YYYY-MM-DD)</option>
+                            <option value="date_modified_mm_dd">Month-Day (MM-DD)</option>
+                            <option value="date_modified_dd">Day (DD)</option>
+                        </optgroup>
+                        <optgroup label="Date Created">
+                            <option value="date_created_yyyy">Year (YYYY)</option>
+                            <option value="date_created_yyyy_mm">Year-Month (YYYY-MM)</option>
+                            <option value="date_created_yyyy_mm_dd">Full Date (YYYY-MM-DD)</option>
+                            <option value="date_created_mm_dd">Month-Day (MM-DD)</option>
+                            <option value="date_created_dd">Day (DD)</option>
+                        </optgroup>
+                        <optgroup label="Music Metadata">
+                            <option value="music_artist">Artist</option>
+                            <option value="music_album">Album</option>
+                            <option value="music_year">Year</option>
+                            <option value="music_year_album">Year - Album</option>
+                        </optgroup>
+                        <optgroup label="Photo Metadata">
+                            <option value="photo_camera_make_model">Camera Make/Model</option>
+                            <option value="photo_year_month">Date Taken (YYYY-MM)</option>
+                        </optgroup>
+                        <optgroup label="Video Metadata">
+                            <option value="video_year">Year</option>
+                        </optgroup>
+                        <optgroup label="Advanced">
+                            <option value="files_per_folder">Files per Folder</option>
+                            <option value="first_n_chars">First 'n' Chars</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <!-- Container for conditional inputs -->
+                <div id="organizeOptionsContainer" class="w-full pl-4 text-center"></div>
+                <div class="w-full">
+                    <label for="organizeBySecondary" class="block mb-1 font-medium">Then by:</label>
+                    <select id="organizeBySecondary" class="w-full bg-gray-200 dark:bg-gray-700 rounded-md p-1">
+                        <option value="none">None</option>
+                        <optgroup label="General">
+                            <option value="type">Type</option>
+                            <option value="extension">Extension</option>
+                            <option value="alphabet">Alphabet</option>
+                            <option value="size">Size</option>
+                            <option value="duplicates" disabled>Duplicates</option>
+                        </optgroup>
+                        <optgroup label="Date Modified">
+                            <option value="date_modified_yyyy">Year (YYYY)</option>
+                            <option value="date_modified_yyyy_mm">Year-Month (YYYY-MM)</option>
+                            <option value="date_modified_yyyy_mm_dd">Full Date (YYYY-MM-DD)</option>
+                            <option value="date_modified_mm_dd">Month-Day (MM-DD)</option>
+                            <option value="date_modified_dd">Day (DD)</option>
+                        </optgroup>
+                        <optgroup label="Date Created">
+                            <option value="date_created_yyyy">Year (YYYY)</option>
+                            <option value="date_created_yyyy_mm">Year-Month (YYYY-MM)</option>
+                            <option value="date_created_yyyy_mm_dd">Full Date (YYYY-MM-DD)</option>
+                            <option value="date_created_mm_dd">Month-Day (MM-DD)</option>
+                            <option value="date_created_dd">Day (DD)</option>
+                        </optgroup>
+                        <optgroup label="Music Metadata">
+                            <option value="music_artist">Artist</option>
+                            <option value="music_album">Album</option>
+                            <option value="music_year">Year</option>
+                            <option value="music_year_album">Year - Album</option>
+                        </optgroup>
+                        <optgroup label="Photo Metadata">
+                            <option value="photo_camera_make_model">Camera Make/Model</option>
+                            <option value="photo_year_month">Date Taken (YYYY-MM)</option>
+                        </optgroup>
+                        <optgroup label="Video Metadata">
+                            <option value="video_year">Year</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            <div id="previewContainer" class="flex-grow overflow-y-auto text-sm">
+                <div id="noFilesMessage" class="h-full flex flex-col items-center justify-center text-gray-500">
+                    <i class="fa-regular fa-file-excel text-4xl mb-2"></i>
+                    <p>Select a source folder to begin.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Confirmation & Info Modals -->
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+        <div class="p-6 text-center">
+            <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4"></div>
+            <h2 id="modalTitle" class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Confirmation</h2>
+        </div>
+        <div id="modalContent" class="text-gray-700 dark:text-gray-300 mb-4 flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 rounded-md mx-6"></div>
+        <div id="modalActions" class="flex justify-end gap-4 mt-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-b-lg">
+            <!-- Buttons are injected here by JS -->
+        </div>
+    </div>
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
+

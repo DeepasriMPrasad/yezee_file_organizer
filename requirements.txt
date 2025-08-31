@@ -1,0 +1,4 @@
+flask
+mutagen
+pymediainfo
+exifread
